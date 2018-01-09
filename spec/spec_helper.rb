@@ -1,5 +1,5 @@
 require "bundler/setup"
-require "watir/screenshot/stitch"
+require "watir-screenshot-stitch"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

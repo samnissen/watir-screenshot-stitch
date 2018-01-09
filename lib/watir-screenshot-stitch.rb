@@ -14,7 +14,8 @@ module Watir
     # Represents stitched together screenshot as Base64 encoded string.
     #
     # @example
-    #   browser.screenshot.save_stitch("abc.png", browser, {:page_height_limit => 5000})
+    #   opts = {:page_height_limit => 5000}
+    #   browser.screenshot.save_stitch("path/abc.png", browser, opts)
     #
     # @param [String] path
     # @param [Watir::Browser] browser
@@ -27,16 +28,12 @@ module Watir
       @browser = browser
 
       calculate_dimensions
-      puts "calculate_dimensions"
 
       build_canvas
-      puts "build_canvas"
 
       gather_slices
-      puts "gather_slices"
 
       stitch_together
-      puts "stitch_together"
 
       @combined_screenshot.write @path
     end
@@ -55,10 +52,6 @@ module Watir
         @mac_factor       ||= 1
 
         limit_page_height
-
-        puts "@page_height -> #{@page_height}; @viewport_height -> #{@viewport_height}"
-        puts "@loops -> #{@loops}; @remainder -> #{@remainder}"
-        puts "@mac_factor -> #{@mac_factor}"
       end
 
       def limit_page_height
@@ -85,6 +78,8 @@ module Watir
         @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
 
         @loops.times do |i|
+          break if loop_exceeds_maximums(i)
+
           @browser.execute_script("window.scrollBy(0,#{@viewport_height})")
           @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
         end
@@ -92,8 +87,7 @@ module Watir
 
       def stitch_together
         @blocks.each_with_index do |next_screenshot, i|
-          break if ( (@blocks.size == (i + 1)) && @crop_remainder )
-          break if ( (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT )
+          break if loop_exceeds_maximums(i)
 
           if (@blocks.size == (i+1))
             # https://gist.github.com/maxivak/3924976
@@ -103,10 +97,17 @@ module Watir
           else
             height = (@viewport_height * i * @mac_factor)
           end
-          puts "combine #{i} height #{height}"
 
           combine_screenshot(next_screenshot, height)
         end
+      end
+
+      def loop_exceeds_maximums(i)
+        (
+          (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT
+        ) || (
+          (@viewport_height * (i + 1) * @mac_factor) > @page_height
+        )
       end
 
       def last_portion_crop(next_screenshot_width)
