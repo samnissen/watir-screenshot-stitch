@@ -55,6 +55,8 @@ module Watir
       end
 
       def limit_page_height
+        @original_page_height = @page_height
+
         if @options[:page_height_limit] && ("#{@options[:page_height_limit]}".to_i > 0)
           @page_height      = [@options[:page_height_limit], @page_height].min
         end
@@ -82,10 +84,18 @@ module Watir
 
       def stitch_together
         @blocks.each_with_index do |next_screenshot, i|
+          if (@blocks.size == (i+1)) && (@original_page_height == @page_height)
+            next_screenshot.crop last_portion_crop(next_screenshot.width)
+          end
+
           height = (@viewport_height * i * @mac_factor)
           combine_screenshot(next_screenshot, height)
         end
       end
+
+      def last_portion_crop(next_screenshot_width)
+        "#{next_screenshot_width}x#{@remainder*@mac_factor}+0+#{(@viewport_height*@mac_factor - @remainder*@mac_factor)}!"
+      end # https://gist.github.com/maxivak/3924976
 
       def combine_screenshot(next_screenshot, offset)
         @combined_screenshot = @combined_screenshot.composite(next_screenshot) do |c|
