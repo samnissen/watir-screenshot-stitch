@@ -13,7 +13,7 @@ RSpec.describe Watir::Screenshot do
   it "saves stitched-together screenshot" do
     @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
     expect(File).to_not exist(@path)
-    opts = { :page_height_limit => 3000 }
+    opts = { :page_height_limit => 2500 }
 
     @browser = Watir::Browser.new :firefox
     @browser.goto "https://github.com/mozilla/geckodriver/issues/570"

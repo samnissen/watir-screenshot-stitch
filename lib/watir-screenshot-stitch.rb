@@ -51,6 +51,7 @@ module Watir
         @mac_factor         = 2 if OS.mac?
         @mac_factor       ||= 1
 
+        limit_page_height
       end
 
       def limit_page_height
