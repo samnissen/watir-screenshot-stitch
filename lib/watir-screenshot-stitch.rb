@@ -77,6 +77,9 @@ module Watir
         @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
 
         @loops.times do |i|
+          break if ( (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT )
+          break if ( (@viewport_height * (i + 1) * @mac_factor) > @page_height )
+
           @browser.execute_script("window.scrollBy(0,#{@viewport_height})")
           @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
         end
@@ -84,8 +87,8 @@ module Watir
 
       def stitch_together
         @blocks.each_with_index do |next_screenshot, i|
-          break if ( (@blocks.size == (i + 1)) && @crop_remainder )
           break if ( (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT )
+          break if ( (@viewport_height * (i + 1) * @mac_factor) > @page_height )
 
           if (@blocks.size == (i+1))
             # https://gist.github.com/maxivak/3924976
@@ -95,7 +98,6 @@ module Watir
           else
             height = (@viewport_height * i * @mac_factor)
           end
-          puts "combine #{i} height #{height}"
 
           combine_screenshot(next_screenshot, height)
         end

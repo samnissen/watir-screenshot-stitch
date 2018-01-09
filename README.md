@@ -38,7 +38,7 @@ opts = { :page_height_limit => 5000 }
 
 b = Watir::Browser.new :firefox
 b.goto "https://github.com/mozilla/geckodriver/issues/570"
-b.full_page_screenshot(path, b, opts)
+b.screenshot.save_stitch(path, b, opts)
 ```
 
 will save a full-page screenshot, up to 5000 pixels tall,
