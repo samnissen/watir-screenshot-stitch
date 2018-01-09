@@ -78,8 +78,7 @@ module Watir
         @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
 
         @loops.times do |i|
-          break if ( (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT )
-          break if ( (@viewport_height * (i + 1) * @mac_factor) > @page_height )
+          break if loop_exceeds_maximums(i)
 
           @browser.execute_script("window.scrollBy(0,#{@viewport_height})")
           @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
@@ -88,8 +87,7 @@ module Watir
 
       def stitch_together
         @blocks.each_with_index do |next_screenshot, i|
-          break if ( (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT )
-          break if ( (@viewport_height * (i + 1) * @mac_factor) > @page_height )
+          break if loop_exceeds_maximums(i)
 
           if (@blocks.size == (i+1))
             # https://gist.github.com/maxivak/3924976
@@ -102,6 +100,14 @@ module Watir
 
           combine_screenshot(next_screenshot, height)
         end
+      end
+
+      def loop_exceeds_maximums(i)
+        (
+          (@viewport_height * (i + 1) * @mac_factor) > MINIMAGICK_PIXEL_DIMENSION_LIMIT
+        ) || (
+          (@viewport_height * (i + 1) * @mac_factor) > @page_height
+        )
       end
 
       def last_portion_crop(next_screenshot_width)
