@@ -14,7 +14,8 @@ module Watir
     # Represents stitched together screenshot as Base64 encoded string.
     #
     # @example
-    #   browser.screenshot.save_stitch("abc.png", browser, {:page_height_limit => 5000})
+    #   opts = {:page_height_limit => 5000}
+    #   browser.screenshot.save_stitch("path/abc.png", browser, opts)
     #
     # @param [String] path
     # @param [Watir::Browser] browser
@@ -27,16 +28,12 @@ module Watir
       @browser = browser
 
       calculate_dimensions
-      puts "calculate_dimensions"
 
       build_canvas
-      puts "build_canvas"
 
       gather_slices
-      puts "gather_slices"
 
       stitch_together
-      puts "stitch_together"
 
       @combined_screenshot.write @path
     end
@@ -54,11 +51,6 @@ module Watir
         @mac_factor         = 2 if OS.mac?
         @mac_factor       ||= 1
 
-        limit_page_height
-
-        puts "@page_height -> #{@page_height}; @viewport_height -> #{@viewport_height}"
-        puts "@loops -> #{@loops}; @remainder -> #{@remainder}"
-        puts "@mac_factor -> #{@mac_factor}"
       end
 
       def limit_page_height

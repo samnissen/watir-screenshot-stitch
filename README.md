@@ -1,34 +1,78 @@
-# Watir::Screenshot::Stitch
+# watir-screenshot-stitch
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/watir/screenshot/stitch`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+watir-screenshot-stitch attempts to compensate for Mozilla's decision
+not to (yet?) expose Firefox's full page screenshot functionality
+via geckodriver, [as indicated here](https://github.com/mozilla/geckodriver/issues/570),
+by paging down a given URL by the size of the viewport, capturing
+the entire page in the process.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'watir-screenshot-stitch'
+gem 'watir-screenshot-stitch', :git => "https://github.com/samnissen/watir-screenshot-stitch.git"
 ```
 
-And then execute:
+### MiniMagick
 
-    $ bundle
+watir-screenshot-stitch relies on [MiniMagick](https://github.com/minimagick/minimagick)
+(and thus ImageMagick). You might need to review that gem's requirements and
+installation before proceeding.
 
-Or install it yourself as:
+### Firefox
 
-    $ gem install watir-screenshot-stitch
+watir-screenshot-stitch is optimized for and tested on Firefox. Your
+Watir / Selenium-Webdriver / geckodriver / Firefox stack must be correctly
+configured. If you can find a good guide for installing and maintaining all
+parts of this stack, you're a better Googler than me.
 
 ## Usage
 
-TODO: Write usage instructions here
+watir-screenshot-stitch attempts can be used with a typical Watir script. This
+
+```ruby
+require 'watir-screenshot-stitch'
+path = "/my/path/image.png"
+opts = { :page_height_limit => 5000 }
+
+b = Watir::Browser.new :firefox
+b.goto "https://github.com/mozilla/geckodriver/issues/570"
+b.full_page_screenshot(path, b, opts)
+```
+
+will save a full-page screenshot, up to 5000 pixels tall,
+to `/my/path/image.png`.
+
+### macOS Retina
+
+watir-screenshot-stitch assumes any user running macOS is displaying at
+'Retina' resolution, therefore multiplies all screen resolutions by 2.
+Any other operating system will not trigger this multiplication.
+
+### Passing the browser?
+
+This is obviously awkward and obtuse. Because watir-screenshot-stitch
+patches Watir, it does not change the way Watir calls the Screenshot class,
+which does not know about the Browser instance (it instead knows
+about the driver). And watir-screenshot-stitch needs the browser to execute
+JavaScript on the page.
+
+### Options
+
+A hash of key value pairs.
+
+#### `:page_height_limit`
+Should refer to a positive Integer greater than the viewport height.
+
+### Maximum height
+ImageMagick has a maximum pixel dimension of 65500, and all screenshots
+will be capped to a maximum height of 65500 regardless of any options
+to avoid errors.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+TODO: This.
 
 ## Contributing
 
