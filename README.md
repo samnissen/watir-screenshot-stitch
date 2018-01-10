@@ -11,7 +11,7 @@ the entire page in the process.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'watir-screenshot-stitch', :git => "https://github.com/samnissen/watir-screenshot-stitch.git"
+gem 'watir-screenshot-stitch'
 ```
 
 ### MiniMagick
