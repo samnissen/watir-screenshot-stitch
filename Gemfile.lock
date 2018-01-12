@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    watir-screenshot-stitch (0.5.0)
+    watir-screenshot-stitch (0.6.0)
       binding_of_caller (~> 0.7)
       mini_magick (~> 4.0)
       os (~> 1.0)
@@ -10,7 +10,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    binding_of_caller (0.7.3)
+    binding_of_caller (0.8.0)
       debug_inspector (>= 0.0.1)
     childprocess (0.8.0)
       ffi (~> 1.0, >= 1.0.11)
