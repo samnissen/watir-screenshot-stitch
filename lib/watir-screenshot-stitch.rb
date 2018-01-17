@@ -6,12 +6,13 @@ require "binding_of_caller"
 require "base64"
 
 MINIMAGICK_PIXEL_DIMENSION_LIMIT = 65500
+MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME = 120
 
 module Watir
   class Screenshot
 
     #
-    # Represents stitched together screenshot as Base64 encoded string.
+    # Represents stitched together screenshot and writes to file.
     #
     # @example
     #   opts = {:page_height_limit => 5000}
@@ -38,7 +39,55 @@ module Watir
       @combined_screenshot.write @path
     end
 
+    #
+    # Employs html2canvas to produce a Base64 encoded string
+    # of a full page screenshot.
+    #
+    # @example
+    #   browser.screenshot.base64_canvas(browser)
+    #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
+    #
+    # @param [Watir::Browser] browser
+    #
+    # @return [String]
+    #
+
+    def base64_canvas(browser)
+      @browser = browser
+      output = nil
+
+      h2c_payload = get_html2canvas
+      @browser.execute_script h2c_payload
+
+      h2c_activator = %<
+        function genScreenshot () {
+          var canvasImgContentDecoded;
+          html2canvas(document.body, {
+            onrendered: function (canvas) {
+             window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+          }});
+        };
+        genScreenshot();
+      >.gsub(/\s+/, ' ').strip
+      @browser.execute_script h2c_activator
+
+      @browser.wait_until(timeout: MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME) {
+        output = @browser.execute_script "return window.canvasImgContentDecoded;"
+      }
+
+      raise "Could not generate screenshot blob within #{MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME} seconds" unless output
+
+      output.sub!(/^data\:image\/png\;base64,/, '')
+
+      return output
+    end
+
     private
+      def get_html2canvas
+        path = File.join(Dir.pwd, "vendor/html2canvas.js")
+        File.read(path)
+      end
+
       def calculate_dimensions
         @start = MiniMagick::Image.read(Base64.decode64(self.base64))
 

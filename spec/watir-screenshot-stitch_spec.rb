@@ -27,4 +27,17 @@ RSpec.describe Watir::Screenshot do
     height = height * 2 if OS.mac?
     expect(image.height).to be <= height
   end
+
+  it "gets a base64 screenshot payload" do
+    @browser = Watir::Browser.new :firefox
+    @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+    out = @browser.screenshot.base64_canvas(@browser)
+
+    expect(out).to be_a(String)
+    expect{
+      MiniMagick::Image.read(Base64.decode64(out))
+    }
+    viewport = (@browser.execute_script "return window.innerHeight").to_f.to_i
+    expect(MiniMagick::Image.read(Base64.decode64(out)).height).to be >= viewport
+  end
 end
