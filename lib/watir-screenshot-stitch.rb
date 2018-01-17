@@ -7,7 +7,7 @@ require "base64"
 
 MINIMAGICK_PIXEL_DIMENSION_LIMIT = 65500
 MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME = 120
-RANGE_MOD = 50 # 2%
+RANGE_MOD = 0.02
 
 module Watir
   class Screenshot
@@ -81,8 +81,8 @@ module Watir
 
         image = MiniMagick::Image.read(Base64.decode64(self.base64))
         range = [
-          @page_height-(@page_height/RANGE_MOD),
-          @page_height+(@page_height/RANGE_MOD)
+          ( @page_height.to_f - (@page_height.to_f * RANGE_MOD) ).to_i,
+          ( @page_height.to_f + (@page_height.to_f * RANGE_MOD) ).to_i
         ]
         image.height.between? *range
       end # https://github.com/mozilla/geckodriver/issues/1129
