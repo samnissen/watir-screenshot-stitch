@@ -7,6 +7,7 @@ require "base64"
 
 MINIMAGICK_PIXEL_DIMENSION_LIMIT = 65500
 MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME = 120
+RANGE_MOD = 50 # 2%
 
 module Watir
   class Screenshot
@@ -27,13 +28,12 @@ module Watir
       @options = opts
       @path = path
       @browser = browser
-
       calculate_dimensions
 
+      return self.save(@path) if (one_shot? || bug_shot?)
+
       build_canvas
-
       gather_slices
-
       stitch_together
 
       @combined_screenshot.write @path
@@ -56,19 +56,9 @@ module Watir
       @browser = browser
       output = nil
 
-      h2c_payload = get_html2canvas
-      @browser.execute_script h2c_payload
+      return self.base64 if one_shot? || bug_shot?
 
-      h2c_activator = %<
-        function genScreenshot () {
-          var canvasImgContentDecoded;
-          html2canvas(document.body, {
-            onrendered: function (canvas) {
-             window.canvasImgContentDecoded = canvas.toDataURL("image/png");
-          }});
-        };
-        genScreenshot();
-      >.gsub(/\s+/, ' ').strip
+      @browser.execute_script html2canvas_payload
       @browser.execute_script h2c_activator
 
       @browser.wait_until(timeout: MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME) {
@@ -77,20 +67,45 @@ module Watir
 
       raise "Could not generate screenshot blob within #{MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME} seconds" unless output
 
-      output.sub!(/^data\:image\/png\;base64,/, '')
-
-      return output
+      return output.sub!(/^data\:image\/png\;base64,/, '')
     end
 
     private
-      def get_html2canvas
+      def one_shot?
+        calculate_dimensions unless @loops && @remainder
+        ( (@loops == 1) && (@remainder == 0) )
+      end
+
+      def bug_shot?
+        calculate_dimensions unless @page_height
+
+        image = MiniMagick::Image.read(Base64.decode64(self.base64))
+        range = [
+          @page_height-(@page_height/RANGE_MOD),
+          @page_height+(@page_height/RANGE_MOD)
+        ]
+        image.height.between? *range
+      end # https://github.com/mozilla/geckodriver/issues/1129
+
+      def h2c_activator
+        %<
+          function genScreenshot () {
+            var canvasImgContentDecoded;
+            html2canvas(document.body, {
+              onrendered: function (canvas) {
+               window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+            }});
+          };
+          genScreenshot();
+        >.gsub(/\s+/, ' ').strip
+      end
+
+      def html2canvas_payload
         path = File.join(Dir.pwd, "vendor/html2canvas.js")
         File.read(path)
       end
 
       def calculate_dimensions
-        @start = MiniMagick::Image.read(Base64.decode64(self.base64))
-
         @viewport_height    = (@browser.execute_script "return window.innerHeight").to_f.to_i
         @page_height        = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
 
@@ -106,7 +121,7 @@ module Watir
       def limit_page_height
         @original_page_height = @page_height
 
-        if @options[:page_height_limit] && ("#{@options[:page_height_limit]}".to_i > 0)
+        if @options && ("#{@options[:page_height_limit]}".to_i > 0)
           @page_height      = [@options[:page_height_limit], @page_height].min
         end
 
@@ -116,6 +131,7 @@ module Watir
       end
 
       def build_canvas
+        @start = MiniMagick::Image.read(Base64.decode64(self.base64))
         @combined_screenshot = MiniMagick::Image.new(@path)
         @combined_screenshot.run_command(:convert, "-size", "#{ @start.width }x#{ @page_height*@mac_factor }", "xc:white", @combined_screenshot.path)
       end
