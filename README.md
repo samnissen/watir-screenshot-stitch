@@ -29,7 +29,9 @@ parts of this stack, you're a better Googler than me.
 
 ## Usage
 
-watir-screenshot-stitch attempts can be used with a typical Watir script. This
+### Stitching
+
+watir-screenshot-stitch can be used with a typical Watir script. This
 
 ```ruby
 require 'watir-screenshot-stitch'
@@ -41,8 +43,24 @@ b.goto "https://github.com/mozilla/geckodriver/issues/570"
 b.screenshot.save_stitch(path, b, opts)
 ```
 
-will save a full-page screenshot, up to 5000 pixels tall,
+will stitch together and save a full-page screenshot, up to 5000 pixels tall,
 to `/my/path/image.png`.
+
+### html2canvas
+
+html2canvas is a JavaScript library watir-screenshot-stitch can employ to
+try to create a canvas element of the entire page and covert it to a blob.
+For instance,
+
+```ruby
+require 'watir-screenshot-stitch'
+
+b = Watir::Browser.new :firefox
+b.goto "https://github.com/watir/watir/issues/702"
+b.screenshot.base64_stitch(b)
+```
+
+will return a base64 encoded image blob of the given site.
 
 ### macOS Retina
 
