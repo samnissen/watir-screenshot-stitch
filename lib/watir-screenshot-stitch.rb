@@ -1,4 +1,5 @@
 require "watir-screenshot-stitch/version"
+require "watir-screenshot-stitch/utilities"
 require "watir"
 require "mini_magick"
 require "os"
@@ -101,7 +102,7 @@ module Watir
       end
 
       def html2canvas_payload
-        path = File.join(Dir.pwd, "vendor/html2canvas.js")
+        path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas.js")
         File.read(path)
       end
 
