@@ -140,12 +140,18 @@ module Watir
       def gather_slices
         @blocks = []
 
+        scroll_to_top
+
         @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
 
         @loops.times do |i|
           @browser.execute_script("window.scrollBy(0,#{@viewport_height})")
           @blocks << MiniMagick::Image.read(Base64.decode64(self.base64))
         end
+      end
+
+      def scroll_to_top
+        @browser.execute_script("document.body.scrollTop = document.documentElement.scrollTop = 0;")
       end
 
       def stitch_together
