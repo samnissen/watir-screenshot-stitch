@@ -57,7 +57,7 @@ require 'watir-screenshot-stitch'
 
 b = Watir::Browser.new :firefox
 b.goto "https://github.com/watir/watir/issues/702"
-b.screenshot.base64_stitch(b)
+b.screenshot.base64_canvas(b)
 ```
 
 will return a base64 encoded image blob of the given site.
