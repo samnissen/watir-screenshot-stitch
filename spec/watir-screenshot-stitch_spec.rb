@@ -24,7 +24,11 @@ RSpec.describe Watir::Screenshot do
 
     image = MiniMagick::Image.open(@path)
     height = opts[:page_height_limit]
-    height = height * 2 if OS.mac?
+
+    s = Watir::Screenshot.new(@browser.driver)
+    s.instance_variable_set(:@browser, @browser)
+    height = height * 2 if s.send(:retina?)
+    
     expect(image.height).to be <= height
   end
 
@@ -45,7 +49,9 @@ RSpec.describe Watir::Screenshot do
     @browser = Watir::Browser.new :firefox
     @browser.goto "https://google.com"
 
-    mac_factor   = 2 if OS.mac?
+    s = Watir::Screenshot.new(@browser.driver)
+    s.instance_variable_set(:@browser, @browser)
+    mac_factor   = 2 if s.send(:retina?)
     mac_factor ||= 1
 
     image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas(@browser)))

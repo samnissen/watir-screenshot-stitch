@@ -110,7 +110,7 @@ module Watir
         @viewport_height    = (@browser.execute_script "return window.innerHeight").to_f.to_i
         @page_height        = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
 
-        @mac_factor         = 2 if OS.mac?
+        @mac_factor         = 2 if retina?
         @mac_factor       ||= 1
 
         limit_page_height
@@ -167,6 +167,12 @@ module Watir
         @combined_screenshot = @combined_screenshot.composite(next_screenshot) do |c|
           c.geometry "+0+#{offset}"
         end
+      end
+
+      def retina?
+        payload = %{var mq = window.matchMedia("only screen and (min--moz-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 2.6/2), only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen  and (min-device-pixel-ratio: 1.3), only screen and (min-resolution: 1.3dppx)"); return (mq && mq.matches || (window.devicePixelRatio > 1));}
+
+        @browser.execute_script payload
       end
   end
 end
