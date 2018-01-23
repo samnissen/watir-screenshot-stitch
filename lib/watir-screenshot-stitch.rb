@@ -78,6 +78,7 @@ module Watir
       end
 
       def bug_shot?
+        return false unless @browser&.name == :firefox
         calculate_dimensions unless @page_height
 
         image = MiniMagick::Image.read(Base64.decode64(self.base64))
