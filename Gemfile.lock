@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    watir-screenshot-stitch (0.6.3)
+    watir-screenshot-stitch (0.6.4)
       binding_of_caller (~> 0.7)
       mini_magick (~> 4.0)
       os (~> 1.0)
