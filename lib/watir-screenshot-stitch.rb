@@ -93,10 +93,9 @@ module Watir
         %<
           function genScreenshot () {
             var canvasImgContentDecoded;
-            html2canvas(document.body, {
-              onrendered: function (canvas) {
-               window.canvasImgContentDecoded = canvas.toDataURL("image/png");
-            }});
+          html2canvas(document.body).then(function (canvas) {
+             window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+          });
           };
           genScreenshot();
         >.gsub(/\s+/, ' ').strip
