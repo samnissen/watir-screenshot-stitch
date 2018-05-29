@@ -15,3 +15,5 @@
 
 # development
 watir-screenshot-stitch-*.gem
+
+Gemfile.lock

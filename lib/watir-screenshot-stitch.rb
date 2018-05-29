@@ -11,24 +11,37 @@ MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME = 120
 RANGE_MOD = 0.02
 
 module Watir
+  class Browser
+    def screenshot
+      Screenshot.new self
+    end
+  end
+
   class Screenshot
+
+    def initialize(browser)
+      if browser.is_a? Selenium::WebDriver::Driver
+        msg = "Watir::Screenshot must be initialized with an instance of Watir::Browser to use watir-screenshot-stitch.gem"
+        raise ArgumentError, msg
+      end
+      @browser = browser
+      @driver = browser.wd
+    end
 
     #
     # Represents stitched together screenshot and writes to file.
     #
     # @example
     #   opts = {:page_height_limit => 5000}
-    #   browser.screenshot.save_stitch("path/abc.png", browser, opts)
+    #   browser.screenshot.save_stitch("path/abc.png", opts)
     #
     # @param [String] path
-    # @param [Watir::Browser] browser
     # @param [Hash] opts
     #
 
-    def save_stitch(path, browser, opts = {})
+    def save_stitch(path, opts = {})
       @options = opts
       @path = path
-      @browser = browser
       calculate_dimensions
 
       return self.save(@path) if (one_shot? || bug_shot?)
@@ -45,16 +58,13 @@ module Watir
     # of a full page screenshot.
     #
     # @example
-    #   browser.screenshot.base64_canvas(browser)
+    #   browser.screenshot.base64_canvas
     #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
-    #
-    # @param [Watir::Browser] browser
     #
     # @return [String]
     #
 
-    def base64_canvas(browser)
-      @browser = browser
+    def base64_canvas
       output = nil
 
       return self.base64 if one_shot? || bug_shot?

@@ -40,7 +40,7 @@ opts = { :page_height_limit => 5000 }
 
 b = Watir::Browser.new :firefox
 b.goto "https://github.com/mozilla/geckodriver/issues/570"
-b.screenshot.save_stitch(path, b, opts)
+b.screenshot.save_stitch(path, opts)
 ```
 
 will stitch together and save a full-page screenshot, up to 5000 pixels tall,
@@ -57,7 +57,7 @@ require 'watir-screenshot-stitch'
 
 b = Watir::Browser.new :firefox
 b.goto "https://github.com/watir/watir/issues/702"
-b.screenshot.base64_canvas(b)
+b.screenshot.base64_canvas
 ```
 
 will return a base64 encoded image blob of the given site.
@@ -71,14 +71,6 @@ as is the case for macOS 'Retina', and relies on this
 logic to determine how to stitch together images.
 This means that moving the browser window while it is be driven by
 Watir can cause unpredictable results.
-
-### Passing the browser?
-
-This is obviously awkward and obtuse. Because watir-screenshot-stitch
-patches Watir, it does not change the way Watir calls the Screenshot class,
-which does not know about the Browser instance (it instead knows
-about the driver). And watir-screenshot-stitch needs the browser to execute
-JavaScript on the page.
 
 ### Options
 
@@ -98,7 +90,7 @@ TODO: This.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/watir-screenshot-stitch. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/samnissen/watir-screenshot-stitch. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
