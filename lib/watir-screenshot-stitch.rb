@@ -18,17 +18,15 @@ module Watir
     #
     # @example
     #   opts = {:page_height_limit => 5000}
-    #   browser.screenshot.save_stitch("path/abc.png", browser, opts)
+    #   browser.screenshot.save_stitch("path/abc.png", opts)
     #
     # @param [String] path
-    # @param [Watir::Browser] browser
     # @param [Hash] opts
     #
 
-    def save_stitch(path, browser, opts = {})
+    def save_stitch(path, opts = {})
       @options = opts
       @path = path
-      @browser = browser
       calculate_dimensions
 
       return self.save(@path) if (one_shot? || bug_shot?)
@@ -45,16 +43,13 @@ module Watir
     # of a full page screenshot.
     #
     # @example
-    #   browser.screenshot.base64_canvas(browser)
+    #   browser.screenshot.base64_canvas
     #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
-    #
-    # @param [Watir::Browser] browser
     #
     # @return [String]
     #
 
-    def base64_canvas(browser)
-      @browser = browser
+    def base64_canvas
       output = nil
 
       return self.base64 if one_shot? || bug_shot?
@@ -78,7 +73,7 @@ module Watir
       end
 
       def bug_shot?
-        return false unless @browser&.name == :firefox
+        return false unless @browser.name == :firefox
         calculate_dimensions unless @page_height
 
         image = MiniMagick::Image.read(Base64.decode64(self.base64))

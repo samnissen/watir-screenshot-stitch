@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
 
-  spec.add_dependency "watir", "~> 6.4"
+  spec.add_dependency "watir", "~> 6.12"
   spec.add_dependency "mini_magick", "~> 4.0"
   spec.add_dependency "os", "~> 1.0"
   spec.add_dependency "binding_of_caller", "~> 0.7"
