@@ -29,6 +29,19 @@ parts of this stack, you're a better Googler than me.
 
 ## Usage
 
+### WARNING: Browser passing will soon no longer be required
+
+As of watir-screenshot-stitch version 0.7.0, the Watir::Screenshot
+class will have access to the browser, and it will not need to be
+passed to the public methods. `save_stitch(path, browser, opts)`
+will become `save_stitch(path, opts)`, and `base64_canvas(browser)`
+will become `base64_canvas` and existing implementations will
+break.
+
+To suppress warnings in the meantime, upgrade to Watir 6.12
+and pass `nil` in place of the `browser` for #save_stitch and
+use `base64_canvas` with no parameters.
+
 ### Stitching
 
 watir-screenshot-stitch can be used with a typical Watir script. This

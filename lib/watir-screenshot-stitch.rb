@@ -1,3 +1,4 @@
+require "time"
 require "watir-screenshot-stitch/version"
 require "watir-screenshot-stitch/utilities"
 require "watir"
@@ -21,12 +22,16 @@ module Watir
     #   browser.screenshot.save_stitch("path/abc.png", opts)
     #
     # @param [String] path
+
+    # @deprecated
+    #   @param [Watir::Browser] browser
     # @param [Hash] opts
     #
 
-    def save_stitch(path, opts = {})
+    def save_stitch(path, browser = @browser, opts = {})
       @options = opts
       @path = path
+      deprecate_browser(browser, (__LINE__-3))
       calculate_dimensions
 
       return self.save(@path) if (one_shot? || bug_shot?)
@@ -46,10 +51,14 @@ module Watir
     #   browser.screenshot.base64_canvas
     #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
     #
+    # @deprecated
+    #   @param [Watir::Browser] browser
+    #
     # @return [String]
     #
 
-    def base64_canvas
+    def base64_canvas(browser = @browser)
+      deprecate_browser(browser, (__LINE__-1))
       output = nil
 
       return self.base64 if one_shot? || bug_shot?
@@ -67,6 +76,12 @@ module Watir
     end
 
     private
+      def deprecate_browser(browser, line)
+        return unless browser
+        warn "#{DateTime.now.strftime("%F %T")} WARN Watir Screenshot Stitch [DEPRECATION] Passing the browser is deprecated and will no longer work in version 0.7.0 /lib/watir-screenshot-stitch.rb:#{line}"
+        @browser = browser
+      end
+
       def one_shot?
         calculate_dimensions unless @loops && @remainder
         ( (@loops == 1) && (@remainder == 0) )
