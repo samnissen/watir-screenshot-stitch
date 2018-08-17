@@ -160,10 +160,6 @@ RSpec.describe Watir::Screenshot do
           diff << [x,y] unless pixel == images.last[x,y]
         end
       end
-
-      puts "pixels (total):     #{images.first.pixels.length}"
-      puts "pixels changed:     #{diff.length}"
-      puts "pixels changed (%): #{(diff.length.to_f / images.first.pixels.length) * 100}%"
       # https://jeffkreeftmeijer.com/ruby-compare-images/
       # https://gist.github.com/jeffkreeftmeijer/923894
 
