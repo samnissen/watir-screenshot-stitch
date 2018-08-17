@@ -99,21 +99,40 @@ module Watir
       end # https://github.com/mozilla/geckodriver/issues/1129
 
       def h2c_activator
-        %<
-          function genScreenshot () {
-            var canvasImgContentDecoded;
-            html2canvas(document.body, {
-              onrendered: function (canvas) {
-               window.canvasImgContentDecoded = canvas.toDataURL("image/png");
-            }});
-          };
-          genScreenshot();
-        >.gsub(/\s+/, ' ').strip
+        return case @browser.driver.browser
+        when :firefox
+          %<
+            function genScreenshot () {
+              var canvasImgContentDecoded;
+              html2canvas(document.body, {
+                onrendered: function (canvas) {
+                 window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+              }});
+            };
+            genScreenshot();
+          >.gsub(/\s+/, ' ').strip
+        else
+          %<
+            function genScreenshot () {
+              var canvasImgContentDecoded;
+              html2canvas(document.body).then(function (canvas) {
+                window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+              });
+            };
+            genScreenshot();
+          >.gsub(/\s+/, ' ').strip
+        end
       end
 
       def html2canvas_payload
-        path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas.js")
-        File.read(path)
+        return case @browser.driver.browser
+        when :firefox
+          path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas-0.4.1.js")
+          File.read(path)
+        else
+          path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas.js")
+          File.read(path)
+        end
       end
 
       def calculate_dimensions
