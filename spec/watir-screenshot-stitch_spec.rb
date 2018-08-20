@@ -62,6 +62,19 @@ RSpec.describe Watir::Screenshot do
       expect(s.send(:one_shot?)).to be_truthy
     end
 
+    it "recalulates the screen resolution each time" do
+      @browser = Watir::Browser.new browser_key
+      @screenshot = @browser.screenshot
+
+      allow(@screenshot).to receive(:retina?).and_return(true)
+      @screenshot.send(:calculate_dimensions)
+      expect(@screenshot.instance_variable_get(:@mac_factor)).to eq(2)
+
+      allow(@screenshot).to receive(:retina?).and_return(false)
+      @screenshot.send(:calculate_dimensions)
+      expect(@screenshot.instance_variable_get(:@mac_factor)).to eq(1)
+    end
+
     # this cannot be tested right now because of:
     # Selenium::WebDriver::Error::UnknownError: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 134"  data: no]
   	#   from capture.canvas@chrome://marionette/content/capture.js:134:3
