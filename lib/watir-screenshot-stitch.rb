@@ -139,8 +139,7 @@ module Watir
         @viewport_height    = (@browser.execute_script "return window.innerHeight").to_f.to_i
         @page_height        = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
 
-        @mac_factor         = 2 if retina?
-        @mac_factor       ||= 1
+        @mac_factor         = retina? ? 2 : 1
 
         limit_page_height
 
