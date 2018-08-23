@@ -62,6 +62,19 @@ RSpec.describe Watir::Screenshot do
       expect(s.send(:one_shot?)).to be_truthy
     end
 
+    it "recalulates the screen resolution each time" do
+      @browser = Watir::Browser.new browser_key
+      @screenshot = @browser.screenshot
+
+      allow(@screenshot).to receive(:retina?).and_return(true)
+      @screenshot.send(:calculate_dimensions)
+      expect(@screenshot.instance_variable_get(:@mac_factor)).to eq(2)
+
+      allow(@screenshot).to receive(:retina?).and_return(false)
+      @screenshot.send(:calculate_dimensions)
+      expect(@screenshot.instance_variable_get(:@mac_factor)).to eq(1)
+    end
+
     # this cannot be tested right now because of:
     # Selenium::WebDriver::Error::UnknownError: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 134"  data: no]
   	#   from capture.canvas@chrome://marionette/content/capture.js:134:3
@@ -135,6 +148,35 @@ RSpec.describe Watir::Screenshot do
       s = Watir::Screenshot.new @browser.driver
       s.instance_variable_set(:@browser, @browser)
       expect(s.send(:one_shot?)).to be_truthy
+    end
+
+    it "handles cross-domain images and svgs" do
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://advisors.massmutual.com/"
+      path1 = "#{Dir.tmpdir}/base64-test#{Time.now.to_i}.png"
+      path2 = "#{Dir.tmpdir}/save-test#{Time.now.to_i}.png"
+      opts = { :page_height_limit => 10000 }
+
+      @browser.goto "https://advisors.massmutual.com/"
+      res = @browser.screenshot.base64_canvas
+      @browser.screenshot.save_stitch(path2, nil, opts)
+      File.open(path1, 'wb') {|f| f.write(Base64.decode64(res)) }
+
+      diff = []
+      images = [
+        ChunkyPNG::Image.from_file(path1),
+        ChunkyPNG::Image.from_file(path2),
+      ]
+
+      images.first.height.times do |y|
+        images.first.row(y).each_with_index do |pixel, x|
+          diff << [x,y] unless pixel == images.last[x,y]
+        end
+      end
+      # https://jeffkreeftmeijer.com/ruby-compare-images/
+      # https://gist.github.com/jeffkreeftmeijer/923894
+
+      expect((diff.length.to_f / images.first.pixels.length) * 100).to be >= (80.0)
     end
   end
 end

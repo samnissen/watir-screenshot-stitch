@@ -1,3 +1,4 @@
+require "time"
 require "watir-screenshot-stitch/version"
 require "watir-screenshot-stitch/utilities"
 require "watir"
@@ -21,14 +22,15 @@ module Watir
     #   browser.screenshot.save_stitch("path/abc.png", browser, opts)
     #
     # @param [String] path
-    # @param [Watir::Browser] browser
+    # @deprecated
+    #   @param [Watir::Browser] browser
     # @param [Hash] opts
     #
 
-    def save_stitch(path, browser, opts = {})
+    def save_stitch(path, browser = @browser, opts = {})
       @options = opts
       @path = path
-      @browser = browser
+      deprecate_browser(browser, (__LINE__-3))
       calculate_dimensions
 
       return self.save(@path) if (one_shot? || bug_shot?)
@@ -48,13 +50,14 @@ module Watir
     #   browser.screenshot.base64_canvas(browser)
     #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
     #
-    # @param [Watir::Browser] browser
+    # @deprecated
+    #   @param [Watir::Browser] browser
     #
     # @return [String]
     #
 
-    def base64_canvas(browser)
-      @browser = browser
+    def base64_canvas(browser = @browser)
+      deprecate_browser(browser, (__LINE__-1))
       output = nil
 
       return self.base64 if one_shot? || bug_shot?
@@ -72,6 +75,12 @@ module Watir
     end
 
     private
+      def deprecate_browser(browser, line)
+        return unless browser
+        warn "#{DateTime.now.strftime("%F %T")} WARN Watir Screenshot Stitch [DEPRECATION] Passing the browser is deprecated and will no longer work in version 0.7.0 /lib/watir-screenshot-stitch.rb:#{line}"
+        @browser = browser
+      end
+
       def one_shot?
         calculate_dimensions unless @loops && @remainder
         ( (@loops == 1) && (@remainder == 0) )
@@ -90,29 +99,47 @@ module Watir
       end # https://github.com/mozilla/geckodriver/issues/1129
 
       def h2c_activator
-        %<
-          function genScreenshot () {
-            var canvasImgContentDecoded;
-            html2canvas(document.body, {
-              onrendered: function (canvas) {
-               window.canvasImgContentDecoded = canvas.toDataURL("image/png");
-            }});
-          };
-          genScreenshot();
-        >.gsub(/\s+/, ' ').strip
+        return case @browser.driver.browser
+        when :firefox
+          %<
+            function genScreenshot () {
+              var canvasImgContentDecoded;
+              html2canvas(document.body, {
+                onrendered: function (canvas) {
+                 window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+              }});
+            };
+            genScreenshot();
+          >.gsub(/\s+/, ' ').strip
+        else
+          %<
+            function genScreenshot () {
+              var canvasImgContentDecoded;
+              html2canvas(document.body).then(function (canvas) {
+                window.canvasImgContentDecoded = canvas.toDataURL("image/png");
+              });
+            };
+            genScreenshot();
+          >.gsub(/\s+/, ' ').strip
+        end
       end
 
       def html2canvas_payload
-        path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas.js")
-        File.read(path)
+        return case @browser.driver.browser
+        when :firefox
+          path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas-0.4.1.js")
+          File.read(path)
+        else
+          path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas.js")
+          File.read(path)
+        end
       end
 
       def calculate_dimensions
         @viewport_height    = (@browser.execute_script "return window.innerHeight").to_f.to_i
         @page_height        = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
 
-        @mac_factor         = 2 if retina?
-        @mac_factor       ||= 1
+        @mac_factor         = retina? ? 2 : 1
 
         limit_page_height
 
