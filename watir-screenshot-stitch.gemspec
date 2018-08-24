@@ -6,8 +6,8 @@ require "watir-screenshot-stitch/version"
 Gem::Specification.new do |spec|
   spec.name          = "watir-screenshot-stitch"
   spec.version       = WatirScreenshotStitch::VERSION
-  spec.authors       = ["Sam Nissen"]
-  spec.email         = ["scnissen@gmail.com"]
+  spec.authors       = ["Sam Nissen", "Sandeep Singh"]
+  spec.email         = ["scnissen@gmail.com", "sandeepnagra@gmail.com"]
 
   spec.summary       = %q{Extends Watir to take stitched-together screenshots of full web pages.}
   # spec.description   = %q{TODO: Write a longer description or delete this line.}

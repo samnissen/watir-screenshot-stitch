@@ -20,10 +20,15 @@ watir-screenshot-stitch relies on [MiniMagick](https://github.com/minimagick/min
 (and thus ImageMagick). You might need to review that gem's requirements and
 installation before proceeding.
 
-### Firefox
+### Browser Support
 
-watir-screenshot-stitch is optimized for and tested on Firefox. Your
-Watir / Selenium-Webdriver / geckodriver / Firefox stack must be correctly
+watir-screenshot-stitch is optimized for and tested on following browsers:
+* Chrome 65+
+* Firefox 58+
+* Safari 11.1
+* IE 11/10/9/8
+
+Your Watir / Selenium-Webdriver / webdriver(chromedriver, geckodriver etc.) / Browser stack must be correctly
 configured. If you can find a good guide for installing and maintaining all
 parts of this stack, you're a better Googler than me.
 
@@ -74,6 +79,13 @@ b.screenshot.base64_canvas(b)
 ```
 
 will return a base64 encoded image blob of the given site.
+
+In can be saved as a PNG by doing:
+```ruby
+png = b.screenshot.base64_canvas(b)
+path = "/my/path/image.png"
+File.open(path, 'wb') { |f| f.write(png) }
+```
 
 ### Doubling resolution calculations, including macOS Retina
 
