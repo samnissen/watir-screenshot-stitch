@@ -28,7 +28,7 @@ watir-screenshot-stitch is optimized for and tested on following browsers:
 * Safari 11.1
 * IE 11/10/9/8
 
-Your Watir / Selenium-Webdriver / webdriver(chromedriver, geckodriver etc.) / Browser stack must be correctly
+Your Watir / Selenium-Webdriver / webdriver / Browser stack must be correctly
 configured. If you can find a good guide for installing and maintaining all
 parts of this stack, you're a better Googler than me.
 
@@ -84,7 +84,7 @@ In can be saved as a PNG by doing:
 ```ruby
 png = b.screenshot.base64_canvas(b)
 path = "/my/path/image.png"
-File.open(path, 'wb') { |f| f.write(png) }
+File.open(path, 'wb') { |f| f.write(Base64.decode64(png)) }
 ```
 
 ### Doubling resolution calculations, including macOS Retina
