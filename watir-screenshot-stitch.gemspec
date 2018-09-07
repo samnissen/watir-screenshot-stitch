@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "chunky_png", "~> 1.3"
 
+  spec.add_dependency "rubyzip", "~> 1.2.2"
   spec.add_dependency "watir", "~> 6.4"
   spec.add_dependency "mini_magick", "~> 4.0"
   spec.add_dependency "os", "~> 1.0"

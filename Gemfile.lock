@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    watir-screenshot-stitch (0.6.8)
+    watir-screenshot-stitch (0.6.9)
       binding_of_caller (~> 0.7)
       mini_magick (~> 4.0)
       os (~> 1.0)
+      rubyzip (~> 1.2.2)
       watir (~> 6.4)
 
 GEM
@@ -34,11 +35,11 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
     rspec-support (3.7.0)
-    rubyzip (1.2.1)
+    rubyzip (1.2.2)
     selenium-webdriver (3.14.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.2)
-    watir (6.12.0)
+    watir (6.13.0)
       selenium-webdriver (~> 3.4, >= 3.4.1)
 
 PLATFORMS
