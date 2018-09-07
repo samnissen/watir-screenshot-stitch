@@ -85,7 +85,7 @@ module Watir
 
       # in IE & Safari a regular screenshot is a full page screenshot only
       def base64_capable?
-        [:internet_explorer, :safari].include? @browser.name
+        [:internet_explorer, :safari].include? @browser&.name
       end
 
       def one_shot?
