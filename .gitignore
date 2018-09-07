@@ -16,3 +16,7 @@
 
 # development
 watir-screenshot-stitch-*.gem
+
+# Gem best practice
+# https://stackoverflow.com/a/4151540/1651458
+Gemfile.lock
