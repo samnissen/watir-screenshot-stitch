@@ -28,6 +28,7 @@ module Watir
     #
 
     def save_stitch(path, browser = @browser, opts = {})
+      return browser.screenshot.save(path) if base64_capable?
       @options = opts
       @path = path
       deprecate_browser(browser, (__LINE__-3))
@@ -57,6 +58,7 @@ module Watir
     #
 
     def base64_canvas(browser = @browser)
+      return self.base64 if base64_capable?
       deprecate_browser(browser, (__LINE__-1))
       output = nil
 
@@ -71,7 +73,7 @@ module Watir
 
       raise "Could not generate screenshot blob within #{MAXIMUM_SCREENSHOT_GENERATION_WAIT_TIME} seconds" unless output
 
-      return output.sub!(/^data\:image\/png\;base64,/, '')
+      output.sub!(/^data\:image\/png\;base64,/, '')
     end
 
     private
@@ -79,6 +81,11 @@ module Watir
         return unless browser
         warn "#{DateTime.now.strftime("%F %T")} WARN Watir Screenshot Stitch [DEPRECATION] Passing the browser is deprecated and will no longer work in version 0.7.0 /lib/watir-screenshot-stitch.rb:#{line}"
         @browser = browser
+      end
+
+      # in IE & Safari a regular screenshot is a full page screenshot only
+      def base64_capable?
+        [:internet_explorer, :safari].include? @browser.name
       end
 
       def one_shot?
@@ -99,7 +106,7 @@ module Watir
       end # https://github.com/mozilla/geckodriver/issues/1129
 
       def h2c_activator
-        return case @browser.driver.browser
+        case @browser.driver.browser
         when :firefox
           %<
             function genScreenshot () {
@@ -125,7 +132,7 @@ module Watir
       end
 
       def html2canvas_payload
-        return case @browser.driver.browser
+        case @browser.driver.browser
         when :firefox
           path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas-0.4.1.js")
           File.read(path)
@@ -204,8 +211,12 @@ module Watir
       end
 
       def retina?
-        payload = %{var mq = window.matchMedia("only screen and (min--moz-device-pixel-ratio: 1.3), only screen and (-o-min-device-pixel-ratio: 2.6/2), only screen and (-webkit-min-device-pixel-ratio: 1.3), only screen  and (min-device-pixel-ratio: 1.3), only screen and (min-resolution: 1.3dppx)"); return (mq && mq.matches || (window.devicePixelRatio > 1));}
-
+        payload = %{ var mq = window.matchMedia("only screen and (min--moz-device-pixel-ratio: 1.3), \
+                                                  only screen and (-o-min-device-pixel-ratio: 2.6/2), \
+                                                  only screen and (-webkit-min-device-pixel-ratio: 1.3), \
+                                                  only screen  and (min-device-pixel-ratio: 1.3), \
+                                                  only screen and (min-resolution: 1.3dppx)");
+                      return (mq && mq.matches || (window.devicePixelRatio > 1)); }
         @browser.execute_script payload
       end
   end
