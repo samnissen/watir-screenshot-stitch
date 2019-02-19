@@ -1,8 +1,9 @@
 # watir-screenshot-stitch
 
-watir-screenshot-stitch attempts to compensate for Mozilla's decision
-not to (yet?) expose Firefox's full page screenshot functionality
-via geckodriver, [as indicated here](https://github.com/mozilla/geckodriver/issues/570).
+watir-screenshot-stitch attempts to compensate for
+[Mozilla's decision not to (yet?) expose Firefox's full page screenshot
+functionality](https://github.com/mozilla/geckodriver/issues/570)
+via geckodriver.
 
 The canonical screenshot stitching is done by paging down a given URL
 by the size of the viewport, capturing the entire page in the process,
@@ -46,7 +47,7 @@ parts of this stack, you're a better Googler than me.
 
 ### Special note: Upgrading from <= 0.6.11
 
-As warned in version 0.6.11, the Watir::Screenshot
+As warned in version 0.6.6 and beyond, the Watir::Screenshot
 class will have access to the browser in watir-screenshot-stitch
 version 0.7.0 and beyond, and it will not need to be
 passed to the public methods. Previous implementations will break.
