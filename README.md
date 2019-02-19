@@ -2,9 +2,19 @@
 
 watir-screenshot-stitch attempts to compensate for Mozilla's decision
 not to (yet?) expose Firefox's full page screenshot functionality
-via geckodriver, [as indicated here](https://github.com/mozilla/geckodriver/issues/570),
-by paging down a given URL by the size of the viewport, capturing
-the entire page in the process.
+via geckodriver, [as indicated here](https://github.com/mozilla/geckodriver/issues/570).
+
+The canonical screenshot stitching is done by paging down a given URL
+by the size of the viewport, capturing the entire page in the process,
+up to the maximum height &mdash; see below.
+
+Alternatively, it also bundles the
+[html2canvas](https://github.com/niklasvh/html2canvas)
+script and applies it to the page. This method of screenshotting
+is less likely to have issues with stitching the images together,
+and running out of memory but has limitations with certain element
+types not being properly displayed. See their documentation for
+more information.
 
 ## Installation
 
@@ -34,18 +44,55 @@ parts of this stack, you're a better Googler than me.
 
 ## Usage
 
-### WARNING: Browser passing will soon no longer be required
+### Special note: Upgrading from <= 0.6.11
 
-As of watir-screenshot-stitch version 0.7.0, the Watir::Screenshot
-class will have access to the browser, and it will not need to be
-passed to the public methods. `save_stitch(path, browser, opts)`
-will become `save_stitch(path, opts)`, and `base64_canvas(browser)`
-will become `base64_canvas` and existing implementations will
-break.
+As warned in version 0.6.11, the Watir::Screenshot
+class will have access to the browser in watir-screenshot-stitch
+version 0.7.0 and beyond, and it will not need to be
+passed to the public methods. Previous implementations will break.
 
-To suppress warnings in the meantime, upgrade to Watir 6.12
-and pass `nil` in place of the `browser` for #save_stitch and
-use `base64_canvas` with no parameters.
+To adapt, change your function calls like so:
+
+<table>
+  <thead>
+    <tr>
+    <th>
+      <= 0.6.5
+    </th>
+    <th>
+      >= 0.6.6 && <= 0.6.11
+    </th>
+    <th>
+      >= 0.7.0
+    </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        `save_stitch(path, browser, opts)`
+      </td>
+      <td>
+        `save_stitch(path, nil, opts)` or
+        `save_stitch(path, browser, opts)`
+      </td>
+      <td>
+        `save_stitch(path, opts)`
+      </td>
+    </tr>
+    <tr>
+      <td>
+        `base64_canvas(browser)`
+      </td>
+      <td>
+        `base64_canvas(browser)` or `base64_canvas`
+      </td>
+      <td>
+        `base64_canvas`
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### Stitching
 
@@ -68,7 +115,7 @@ to `/my/path/image.png`.
 
 html2canvas is a JavaScript library watir-screenshot-stitch can employ to
 try to create a canvas element of the entire page and covert it to a blob.
-For instance,
+For instance, this
 
 ```ruby
 require 'watir-screenshot-stitch'
@@ -97,14 +144,6 @@ logic to determine how to stitch together images.
 This means that moving the browser window while it is be driven by
 Watir can cause unpredictable results.
 
-### Passing the browser?
-
-This is obviously awkward and obtuse. Because watir-screenshot-stitch
-patches Watir, it does not change the way Watir calls the Screenshot class,
-which does not know about the Browser instance (it instead knows
-about the driver). And watir-screenshot-stitch needs the browser to execute
-JavaScript on the page.
-
 ### Options
 
 A hash of key value pairs.
@@ -119,11 +158,13 @@ to avoid errors.
 
 ## Development
 
-TODO: This.
+Use `rspec` to run the tests, and see the
+(contributing)[#Contributing] section below &mdash;
+all are welcome.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/watir-screenshot-stitch. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/samnissen/watir-screenshot-stitch. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 

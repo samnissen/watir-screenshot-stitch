@@ -16,7 +16,7 @@ RSpec.describe Watir::Screenshot do
 
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
-      @browser.screenshot.save_stitch(@path, @browser, opts)
+      @browser.screenshot.save_stitch(@path, opts)
 
       expect(File).to exist(@path)
       expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
@@ -24,7 +24,7 @@ RSpec.describe Watir::Screenshot do
       image = MiniMagick::Image.open(@path)
       height = opts[:page_height_limit]
 
-      s = Watir::Screenshot.new(@browser.driver)
+      s = Watir::Screenshot.new(@browser)
       s.instance_variable_set(:@browser, @browser)
       height = height * 2 if s.send(:retina?)
 
@@ -34,7 +34,7 @@ RSpec.describe Watir::Screenshot do
     it "gets a base64 screenshot payload" do
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
-      out = @browser.screenshot.base64_canvas(@browser)
+      out = @browser.screenshot.base64_canvas
 
       expect(out).to be_a(String)
       expect{
@@ -48,16 +48,16 @@ RSpec.describe Watir::Screenshot do
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://google.com"
 
-      s = Watir::Screenshot.new(@browser.driver)
+      s = Watir::Screenshot.new(@browser)
       s.instance_variable_set(:@browser, @browser)
       mac_factor   = 2 if s.send(:retina?)
       mac_factor ||= 1
 
-      image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas(@browser)))
+      image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas))
       page_height = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
       expect(image.height).to eq(page_height*mac_factor)
 
-      s = Watir::Screenshot.new @browser.driver
+      s = Watir::Screenshot.new @browser
       s.instance_variable_set(:@browser, @browser)
       expect(s.send(:one_shot?)).to be_truthy
     end
@@ -87,7 +87,7 @@ RSpec.describe Watir::Screenshot do
     # it "stops taking screenshots when given full screenshot" do
       # @browser = Watir::Browser.new browser_key
       # @browser.goto "https://sixcolors.com"
-      # image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas(@browser)))
+      # image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas))
       # page_height = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
       # expect(image.height).to eq(page_height)
       # expect(s.send(:bug_shot?)).to be_truthy
@@ -104,7 +104,7 @@ RSpec.describe Watir::Screenshot do
 
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
-      @browser.screenshot.save_stitch(@path, @browser, opts)
+      @browser.screenshot.save_stitch(@path, opts)
 
       expect(File).to exist(@path)
       expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
@@ -112,7 +112,7 @@ RSpec.describe Watir::Screenshot do
       image = MiniMagick::Image.open(@path)
       height = opts[:page_height_limit]
 
-      s = Watir::Screenshot.new(@browser.driver)
+      s = Watir::Screenshot.new(@browser)
       s.instance_variable_set(:@browser, @browser)
       height = height * 2 if s.send(:retina?)
 
@@ -122,7 +122,7 @@ RSpec.describe Watir::Screenshot do
     it "gets a base64 screenshot payload" do
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
-      out = @browser.screenshot.base64_canvas(@browser)
+      out = @browser.screenshot.base64_canvas
 
       expect(out).to be_a(String)
       expect{
@@ -136,21 +136,23 @@ RSpec.describe Watir::Screenshot do
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://google.com"
 
-      s = Watir::Screenshot.new(@browser.driver)
+      s = Watir::Screenshot.new(@browser)
       s.instance_variable_set(:@browser, @browser)
       mac_factor   = 2 if s.send(:retina?)
       mac_factor ||= 1
 
-      image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas(@browser)))
+      image = MiniMagick::Image.read(Base64.decode64(@browser.screenshot.base64_canvas))
       page_height = (@browser.execute_script "return Math.max( document.documentElement.scrollHeight, document.documentElement.getBoundingClientRect().height )").to_f.to_i
       expect(image.height).to eq(page_height*mac_factor)
 
-      s = Watir::Screenshot.new @browser.driver
+      s = Watir::Screenshot.new @browser
       s.instance_variable_set(:@browser, @browser)
       expect(s.send(:one_shot?)).to be_truthy
     end
 
     it "handles cross-domain images and svgs" do
+      pending("a version of base64_canvas that can actually do this")
+
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://advisors.massmutual.com/"
       path1 = "#{Dir.tmpdir}/base64-test#{Time.now.to_i}.png"
@@ -159,7 +161,7 @@ RSpec.describe Watir::Screenshot do
 
       @browser.goto "https://advisors.massmutual.com/"
       res = @browser.screenshot.base64_canvas
-      @browser.screenshot.save_stitch(path2, nil, opts)
+      @browser.screenshot.save_stitch(path2, opts)
       File.open(path1, 'wb') {|f| f.write(Base64.decode64(res)) }
 
       diff = []
