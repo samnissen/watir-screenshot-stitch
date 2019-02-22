@@ -15,6 +15,33 @@ module Watir
   class Screenshot
 
     #
+    # Employs a cutting edge feature in geckodriver version 0.24.0
+    # to produce a Base64 encoded string of a full page screenshot.
+    #
+    # @warning
+    #   This will fail if geckodriver is > version 0.24.0.
+    #
+    # @info
+    #   This is only a patch until this is baked into Selenium/Watir.
+    #
+    # @example
+    #   browser.screenshot.base64_geckodriver(browser)
+    #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
+    #
+    # @return [String]
+    #
+
+    def base64_geckodriver
+      ensure_geckodriver
+
+      resource_url = build_driver_url
+
+      raw = request_payload(resource_url)
+
+      parse_gecko(raw)
+    end
+
+    #
     # Represents stitched together screenshot and writes to file.
     #
     # @example
@@ -28,7 +55,7 @@ module Watir
     #
 
     def save_stitch(path, opts = {})
-      return browser.screenshot.save(path) if base64_capable?
+      return @browser.screenshot.save(path) if base64_capable?
       @options = opts
       @path = path
       calculate_dimensions
@@ -75,10 +102,56 @@ module Watir
     end
 
     private
-      def deprecate_browser(browser, line)
-        return unless browser
-        warn "#{DateTime.now.strftime("%F %T")} WARN Watir Screenshot Stitch [DEPRECATION] Passing the browser is deprecated and will no longer work in version 0.7.0 /lib/watir-screenshot-stitch.rb:#{line}"
-        @browser = browser
+      def parse_gecko(raw = '')
+        JSON.parse(raw, symbolize_names: true)[:value]
+      rescue JSON::ParserError => e
+        raise "geckodriver response '#{raw}' was malformed"
+      end
+
+      def request_payload(request_url)
+        url = URI.parse(request_url)
+        req = Net::HTTP::Get.new(request_url)
+        Net::HTTP.start(url.host, url.port) {|http| http.request(req) }.body
+      rescue Errno::ECONNREFUSED => e
+        raise "geckodriver could not be accessed at '#{request_url}'"
+      end
+
+      def build_driver_path
+        bridge = @browser.driver.session_storage.instance_variable_get(:@bridge)
+        sid = bridge.instance_variable_get(:@session_id)
+
+        raise "Unable to get geckodriver session ID." unless sid
+
+        "session/#{sid}/moz/screenshot/full"
+      end
+
+      def build_driver_url
+        bridge = @browser.driver.session_storage.instance_variable_get(:@bridge)
+        server_uri = bridge.instance_variable_get(:@http).instance_variable_get(:@server_url)
+
+        raise "Unable to get geckodriver server URI." unless server_uri
+
+        request_url = server_uri.to_s + build_driver_path
+      end
+
+      def ensure_geckodriver
+        raise "base64_geckodriver only works on Firefox" unless @browser.name == :firefox
+
+        if webdrivers_defined?
+          current_version = Webdrivers::Geckodriver.current_version
+        else
+          current_version = Gem::Version.new(%x{geckodriver --version}.match(/geckodriver (\d+\.\d+\.\d+)/)[1])
+        end
+
+        correct_version = (current_version >= Gem::Version.new("0.24.0"))
+
+        raise "base64_geckodriver requires version 0.24.x or greater" unless correct_version
+      end
+
+      def webdrivers_defined?
+        'Webdrivers'.constantize
+      rescue
+        nil
       end
 
       # in IE & Safari a regular screenshot is a full page screenshot only

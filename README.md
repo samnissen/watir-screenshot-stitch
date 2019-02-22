@@ -95,6 +95,35 @@ To adapt, change your function calls like so:
   </tbody>
 </table>
 
+### Using geckodriver
+
+watir-screenshot-stitch can employ a special function of geckodriver >= 0.24.0
+while driving Firefox. This
+
+```ruby
+require 'watir-screenshot-stitch'
+b = Watir::Browser.new :firefox
+b.goto "https://github.com/mozilla/geckodriver/issues/570"
+b.base64_geckodriver
+```
+will return a base64 encoded image blob of the given site.
+
+In can be saved as a PNG by doing:
+```ruby
+png = b.screenshot.base64_canvas
+path = "/my/path/image.png"
+File.open(path, 'wb') { |f| f.write(Base64.decode64(png)) }
+```
+
+This is the option with the fewest complications, and should be used
+if possible.
+
+#### User geckodriver vs. webdrivers geckodriver
+
+If using the webdrivers gem, watir-screenshot-stitch will attempt to
+use the geckodriver included there, since that's likely to be
+the driver employed by watir. If not, it falls back to the the system user's geckodriver.
+
 ### Stitching
 
 watir-screenshot-stitch can be used with a typical Watir script. This
@@ -106,7 +135,7 @@ opts = { :page_height_limit => 5000 }
 
 b = Watir::Browser.new :firefox
 b.goto "https://github.com/mozilla/geckodriver/issues/570"
-b.screenshot.save_stitch(path, b, opts)
+b.screenshot.save_stitch(path, opts)
 ```
 
 will stitch together and save a full-page screenshot, up to 5000 pixels tall,
@@ -123,14 +152,14 @@ require 'watir-screenshot-stitch'
 
 b = Watir::Browser.new :firefox
 b.goto "https://github.com/watir/watir/issues/702"
-b.screenshot.base64_canvas(b)
+b.screenshot.base64_canvas
 ```
 
 will return a base64 encoded image blob of the given site.
 
 In can be saved as a PNG by doing:
 ```ruby
-png = b.screenshot.base64_canvas(b)
+png = b.screenshot.base64_canvas
 path = "/my/path/image.png"
 File.open(path, 'wb') { |f| f.write(Base64.decode64(png)) }
 ```
