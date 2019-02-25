@@ -27,11 +27,10 @@ module Watir
     # @param [Hash] opts
     #
 
-    def save_stitch(path, browser = @browser, opts = {})
+    def save_stitch(path, opts = {})
       return browser.screenshot.save(path) if base64_capable?
       @options = opts
       @path = path
-      deprecate_browser(browser, (__LINE__-3))
       calculate_dimensions
 
       return self.save(@path) if (one_shot? || bug_shot?)
@@ -57,9 +56,8 @@ module Watir
     # @return [String]
     #
 
-    def base64_canvas(browser = @browser)
+    def base64_canvas
       return self.base64 if base64_capable?
-      deprecate_browser(browser, (__LINE__-1))
       output = nil
 
       return self.base64 if one_shot? || bug_shot?

@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.3.0'
 
   spec.add_dependency "rubyzip", "~> 1.2"
-  spec.add_dependency "watir", "~> 6.4"
+  spec.add_dependency "watir", "~> 6.12"
   spec.add_dependency "mini_magick", "~> 4.0"
   spec.add_dependency "os", "~> 1.0"
   spec.add_dependency "binding_of_caller", "~> 0.7"
