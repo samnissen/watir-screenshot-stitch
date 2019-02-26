@@ -19,13 +19,13 @@ module Watir
     # to produce a Base64 encoded string of a full page screenshot.
     #
     # @warning
-    #   This will fail if geckodriver is > version 0.24.0.
+    #   This will fail if geckodriver is less than version 0.24.0.
     #
     # @info
     #   This is only a patch until this is baked into Selenium/Watir.
     #
     # @example
-    #   browser.screenshot.base64_geckodriver(browser)
+    #   browser.screenshot.base64_geckodriver
     #   #=> '7HWJ43tZDscPleeUuPW6HhN3x+z7vU/lufmH0qNTtTum94IBWMT46evImci1vnFGT'
     #
     # @return [String]
