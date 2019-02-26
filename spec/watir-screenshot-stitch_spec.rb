@@ -9,6 +9,19 @@ RSpec.describe Watir::Screenshot do
   context "driving firefox" do
     let(:browser_key) { :firefox }
 
+    it "gets a base64 screenshot payload from base64_geckodriver" do
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+      out = @browser.screenshot.base64_geckodriver
+
+      expect(out).to be_a(String)
+      expect{
+        MiniMagick::Image.read(Base64.decode64(out))
+      }.not_to raise_error
+      viewport = (@browser.execute_script "return window.innerHeight").to_f.to_i
+      expect(MiniMagick::Image.read(Base64.decode64(out)).height).to be >= viewport
+    end
+
     it "saves stitched-together screenshot" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
@@ -31,7 +44,7 @@ RSpec.describe Watir::Screenshot do
       expect(image.height).to be <= height
     end
 
-    it "gets a base64 screenshot payload" do
+    it "gets a base64 screenshot payload from base64_canvas" do
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       out = @browser.screenshot.base64_canvas
@@ -39,7 +52,7 @@ RSpec.describe Watir::Screenshot do
       expect(out).to be_a(String)
       expect{
         MiniMagick::Image.read(Base64.decode64(out))
-      }
+      }.not_to raise_error
       viewport = (@browser.execute_script "return window.innerHeight").to_f.to_i
       expect(MiniMagick::Image.read(Base64.decode64(out)).height).to be >= viewport
     end
