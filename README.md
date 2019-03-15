@@ -1,21 +1,19 @@
 # watir-screenshot-stitch
 
 watir-screenshot-stitch attempts to compensate for
-[Mozilla's decision not to (yet?) expose Firefox's full page screenshot
-functionality](https://github.com/mozilla/geckodriver/issues/570)
-via geckodriver.
+the lack of full page screenshot functionality
+in Selenium Webdriver.
 
-The canonical screenshot stitching is done by paging down a given URL
-by the size of the viewport, capturing the entire page in the process,
-up to the maximum height &mdash; see below.
+It does so in three ways:
 
-Alternatively, it also bundles the
+* Directly employing geckodriver's new full page screenshot
+functionality (only on Firefox).
+* Screenshot stitching, paging down a given URL by the size 
+of the viewport, capturing screenshots and adjoining them.
+* Employing a bundled
 [html2canvas](https://github.com/niklasvh/html2canvas)
-script and applies it to the page. This method of screenshotting
-is less likely to have issues with stitching the images together,
-and running out of memory but has limitations with certain element
-types not being properly displayed. See their documentation for
-more information.
+script against the page to generate a png from a `canvas`
+element. 
 
 ## Installation
 
@@ -110,7 +108,7 @@ will return a base64 encoded image blob of the given site.
 
 In can be saved as a PNG by doing:
 ```ruby
-png = b.screenshot.base64_canvas
+png = b.screenshot.base64_geckodriver
 path = "/my/path/image.png"
 File.open(path, 'wb') { |f| f.write(Base64.decode64(png)) }
 ```
@@ -164,6 +162,12 @@ path = "/my/path/image.png"
 File.open(path, 'wb') { |f| f.write(Base64.decode64(png)) }
 ```
 
+This method of screenshotting
+is less likely to have issues with stitching the images together,
+and running out of memory but has limitations with certain element
+types not being properly displayed. See their documentation for
+more information.
+
 ### Doubling resolution calculations, including macOS Retina
 
 watir-screenshot-stitch uses CSS selectors to determine whether a
@@ -182,9 +186,9 @@ A hash of key value pairs.
 Should refer to a positive Integer greater than the viewport height.
 
 ### Maximum height
-ImageMagick has a maximum pixel dimension of 65500, and all screenshots
-will be capped to a maximum height of 65500 regardless of any options
-to avoid errors.
+ImageMagick has a maximum pixel dimension of 65500, and all stitched
+screenshots will be capped to a maximum height of 65500 regardless 
+of any options to avoid errors.
 
 ## Development
 
