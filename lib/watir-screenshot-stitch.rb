@@ -148,8 +148,8 @@ module Watir
       end
 
       def webdrivers_defined?
-        'Webdrivers'.constantize
-      rescue
+        Object.const_get("Webdrivers")
+      rescue NameError
         nil
       end
 
