@@ -1,6 +1,5 @@
 require "time"
 require "watir-screenshot-stitch/version"
-require "watir-screenshot-stitch/utilities"
 require "watir"
 require "mini_magick"
 require "os"
@@ -205,10 +204,10 @@ module Watir
       def html2canvas_payload
         case @browser.driver.browser
         when :firefox
-          path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas-0.4.1.js")
+          path = File.expand_path("../../vendor/html2canvas-0.4.1.js", __FILE__)
           File.read(path)
         else
-          path = File.join(WatirScreenshotStitch::Utilities.directory, "vendor/html2canvas.js")
+          path = File.expand_path("../../vendor/html2canvas.js", __FILE__)
           File.read(path)
         end
       end
