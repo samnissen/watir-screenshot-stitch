@@ -1,4 +1,4 @@
 module WatirScreenshotStitch
   NAME = 'watir-screenshot-stitch'
-  VERSION = "0.7.5"
+  VERSION = "0.7.6"
 end
