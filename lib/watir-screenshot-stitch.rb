@@ -63,9 +63,10 @@ module Watir
 
       build_canvas
       gather_slices
-      stitch_together
-
-      @combined_screenshot.write @path
+      Thread.new do
+        stitch_together
+        @combined_screenshot.write @path
+      end
     end
 
     #
