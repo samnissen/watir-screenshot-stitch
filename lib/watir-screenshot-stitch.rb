@@ -63,10 +63,14 @@ module Watir
 
       build_canvas
       gather_slices
-      Thread.new do
-        stitch_together
-        @combined_screenshot.write @path
+      isolator = Mutex.new
+      stitch = Thread.new do
+        isolator.synchronize do
+          stitch_together
+          @combined_screenshot.write @path
+        end
       end
+      at_exit { stitch.join }
     end
 
     #
