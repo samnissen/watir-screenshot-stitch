@@ -63,7 +63,6 @@ module Watir
 
       build_canvas
       gather_slices
-      isolator = Mutex.new
       stitch = Thread.new do
         isolator.synchronize do
           stitch_together
@@ -106,6 +105,11 @@ module Watir
     end
 
     private
+      @isolator = Mutex.new
+      def isolator
+        self.class.instance_variable_get('@isolator')
+      end
+
       def parse_gecko(raw = '')
         JSON.parse(raw, symbolize_names: true)[:value]
       rescue JSON::ParserError => e
