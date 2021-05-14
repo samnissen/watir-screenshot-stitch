@@ -70,6 +70,7 @@ module Watir
         end
       end
       at_exit { stitch.join }
+      stitch
     end
 
     #

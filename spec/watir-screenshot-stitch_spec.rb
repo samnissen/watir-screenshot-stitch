@@ -29,7 +29,7 @@ RSpec.describe Watir::Screenshot do
 
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
-      @browser.screenshot.save_stitch(@path, opts)
+      @browser.screenshot.save_stitch(@path, opts).join
 
       expect(File).to exist(@path)
       expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
