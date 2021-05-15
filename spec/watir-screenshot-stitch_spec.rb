@@ -22,6 +22,15 @@ RSpec.describe Watir::Screenshot do
       expect(MiniMagick::Image.read(Base64.decode64(out)).height).to be >= viewport
     end
 
+    it "creates and returns a new thread to stitch and save the screenshot" do
+      @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
+      opts = { :page_height_limit => 2500 }
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+      thread = @browser.screenshot.save_stitch(@path, opts)
+      expect(thread).to be_a Thread
+    end
+
     it "saves stitched-together color screenshot" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
@@ -118,7 +127,7 @@ RSpec.describe Watir::Screenshot do
 
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
-      @browser.screenshot.save_stitch(@path, opts)
+      @browser.screenshot.save_stitch(@path, opts).join
 
       expect(File).to exist(@path)
       expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
@@ -175,7 +184,7 @@ RSpec.describe Watir::Screenshot do
 
       @browser.goto "https://advisors.massmutual.com/"
       res = @browser.screenshot.base64_canvas
-      @browser.screenshot.save_stitch(path2, opts)
+      @browser.screenshot.save_stitch(path2, opts).join
       File.open(path1, 'wb') {|f| f.write(Base64.decode64(res)) }
 
       diff = []

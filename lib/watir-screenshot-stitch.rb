@@ -52,6 +52,8 @@ module Watir
     #   @param [Watir::Browser] browser
     # @param [Hash] opts
     #
+    # @return [Thread]
+    #
 
     def save_stitch(path, opts = {})
       return @browser.screenshot.save(path) if base64_capable?
