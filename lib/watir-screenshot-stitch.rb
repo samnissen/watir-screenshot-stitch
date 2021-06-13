@@ -57,22 +57,26 @@ module Watir
 
     def save_stitch(path, opts = {})
       return @browser.screenshot.save(path) if base64_capable?
-      @options = opts
-      @path = path
-      calculate_dimensions
+      # wait for anything instance level mutex to become available
+      instance_isolator.synchronize do
+        @options = opts
+        @path = path
+        calculate_dimensions
 
-      return self.save(@path) if (one_shot? || bug_shot?)
+        return self.save(@path) if (one_shot? || bug_shot?)
 
-      build_canvas
-      gather_slices
-      stitch = Thread.new do
-        isolator.synchronize do
-          stitch_together
-          @combined_screenshot.write @path
-        end
+        build_canvas
+        gather_slices
+        opts[:threaded?] ? Thread.new { stitch }.tap { |t| at_exit { t.join } } : stitch
       end
-      at_exit { stitch.join }
-      stitch
+    end
+
+    private def stitch
+      # wait for the class level mutex to become available
+      class_isolator.synchronize do
+        stitch_together
+        @combined_screenshot.write @path
+      end
     end
 
     #
@@ -109,8 +113,14 @@ module Watir
 
     private
       @isolator = Mutex.new
-      def isolator
+      # Class level mutual exclusion check for threads.
+      def class_isolator
         self.class.instance_variable_get('@isolator')
+      end
+
+      # Instance level mutual exclusion check for threads.
+      def instance_isolator
+        @isolator ||= Mutex.new
       end
 
       def parse_gecko(raw = '')
