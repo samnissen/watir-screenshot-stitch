@@ -52,20 +52,31 @@ module Watir
     #   @param [Watir::Browser] browser
     # @param [Hash] opts
     #
+    # @return [Thread]
+    #
 
     def save_stitch(path, opts = {})
       return @browser.screenshot.save(path) if base64_capable?
-      @options = opts
-      @path = path
-      calculate_dimensions
+      # wait for anything instance level mutex to become available
+      isolator.synchronize do
+        @options = opts
+        @path = path
+        calculate_dimensions
 
-      return self.save(@path) if (one_shot? || bug_shot?)
+        return self.save(@path) if (one_shot? || bug_shot?)
 
-      build_canvas
-      gather_slices
-      stitch_together
+        build_canvas
+        gather_slices
+        opts[:threaded] ? Thread.new { stitch }.tap { |t| at_exit { t.join } } : stitch
+      end
+    end
 
-      @combined_screenshot.write @path
+    private def stitch
+      # wait for the class level mutex to become available
+      Screenshot.isolator.synchronize do
+        stitch_together
+        @combined_screenshot.write @path
+      end
     end
 
     #
@@ -101,6 +112,16 @@ module Watir
     end
 
     private
+      def self.isolator
+        @isolator ||= Mutex.new
+      end
+      # Class level mutual exclusion check for threads.
+
+      # Instance level mutual exclusion check for threads.
+      def isolator
+        @isolator ||= Mutex.new
+      end
+
       def parse_gecko(raw = '')
         JSON.parse(raw, symbolize_names: true)[:value]
       rescue JSON::ParserError => e
