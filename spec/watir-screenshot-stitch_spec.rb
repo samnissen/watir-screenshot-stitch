@@ -24,7 +24,7 @@ RSpec.describe Watir::Screenshot do
 
     it "can create and return for concurrent execution" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
-      opts = { :page_height_limit => 2500, threaded?: true }
+      opts = { :page_height_limit => 2500, :threaded => true }
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       thread = @browser.screenshot.save_stitch(@path, opts)
@@ -57,7 +57,7 @@ RSpec.describe Watir::Screenshot do
     it "saves stitched-together color screenshot in threaded mode" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
-      opts = { :page_height_limit => 2500, threaded?: true }
+      opts = { :page_height_limit => 2500, :threaded => true }
 
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
@@ -168,7 +168,7 @@ RSpec.describe Watir::Screenshot do
     it "saves stitched-together screenshot in threaded mode" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
-      opts = { :page_height_limit => 2500, threaded?: true }
+      opts = { :page_height_limit => 2500, :threaded => true }
 
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
@@ -189,7 +189,7 @@ RSpec.describe Watir::Screenshot do
 
     it "can create and return a thread for concurrent execution" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
-      opts = { :page_height_limit => 2500, threaded?: true }
+      opts = { :page_height_limit => 2500, :threaded => true }
       @browser = Watir::Browser.new browser_key
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       thread = @browser.screenshot.save_stitch(@path, opts)

@@ -58,7 +58,7 @@ module Watir
     def save_stitch(path, opts = {})
       return @browser.screenshot.save(path) if base64_capable?
       # wait for anything instance level mutex to become available
-      instance_isolator.synchronize do
+      isolator.synchronize do
         @options = opts
         @path = path
         calculate_dimensions
@@ -67,13 +67,13 @@ module Watir
 
         build_canvas
         gather_slices
-        opts[:threaded?] ? Thread.new { stitch }.tap { |t| at_exit { t.join } } : stitch
+        opts[:threaded] ? Thread.new { stitch }.tap { |t| at_exit { t.join } } : stitch
       end
     end
 
     private def stitch
       # wait for the class level mutex to become available
-      class_isolator.synchronize do
+      Screenshot.isolator.synchronize do
         stitch_together
         @combined_screenshot.write @path
       end
@@ -112,14 +112,13 @@ module Watir
     end
 
     private
-      @isolator = Mutex.new
-      # Class level mutual exclusion check for threads.
-      def class_isolator
-        self.class.instance_variable_get('@isolator')
+      def self.isolator
+        @isolator ||= Mutex.new
       end
+      # Class level mutual exclusion check for threads.
 
       # Instance level mutual exclusion check for threads.
-      def instance_isolator
+      def isolator
         @isolator ||= Mutex.new
       end
 
