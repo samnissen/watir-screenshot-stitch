@@ -23,7 +23,7 @@ RSpec.describe Watir::Screenshot do
       expect(MiniMagick::Image.read(Base64.decode64(out)).height).to be >= viewport
     end
 
-    it "saves stitched-together screenshot" do
+    it "saves stitched-together color screenshot" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
       opts = { :page_height_limit => 2500 }
@@ -43,6 +43,7 @@ RSpec.describe Watir::Screenshot do
       height = height * 2 if s.send(:retina?)
 
       expect(image.height).to be <= height
+      expect(image.colorspace).not_to match(/gray/i)
     end
 
     it "gets a base64 screenshot payload from base64_canvas" do

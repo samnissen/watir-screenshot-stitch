@@ -239,7 +239,7 @@ module Watir
       def build_canvas
         @start = MiniMagick::Image.read(Base64.decode64(self.base64))
         @combined_screenshot = MiniMagick::Image.new(@path)
-        @combined_screenshot.run_command(:convert, "-size", "#{ @start.width }x#{ @page_height*@mac_factor }", "xc:white", @combined_screenshot.path)
+        @combined_screenshot.run_command(:convert, "-size", "#{ @start.width }x#{ @page_height*@mac_factor }", "xc:white", "-define", "png:color-type=6", @combined_screenshot.path)
       end
 
       def gather_slices
