@@ -23,6 +23,15 @@ RSpec.describe Watir::Screenshot do
       expect(MiniMagick::Image.read(Base64.decode64(out)).height).to be >= viewport
     end
 
+    it "can create and return for concurrent execution" do
+      @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
+      opts = { :page_height_limit => 2500, :threaded => true }
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+      thread = @browser.screenshot.save_stitch(@path, opts)
+      expect(thread).to be_a Thread
+    end
+
     it "saves stitched-together color screenshot" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
@@ -31,6 +40,29 @@ RSpec.describe Watir::Screenshot do
       @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       @browser.screenshot.save_stitch(@path, opts)
+
+      expect(File).to exist(@path)
+      expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
+
+      image = MiniMagick::Image.open(@path)
+      height = opts[:page_height_limit]
+
+      s = Watir::Screenshot.new(@browser)
+      s.instance_variable_set(:@browser, @browser)
+      height = height * 2 if s.send(:retina?)
+
+      expect(image.height).to be <= height
+      expect(image.colorspace).not_to match(/gray/i)
+    end
+
+    it "saves stitched-together color screenshot in threaded mode" do
+      @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
+      expect(File).to_not exist(@path)
+      opts = { :page_height_limit => 2500, :threaded => true }
+
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+      @browser.screenshot.save_stitch(@path, opts).join
 
       expect(File).to exist(@path)
       expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
@@ -135,6 +167,38 @@ RSpec.describe Watir::Screenshot do
       expect(image.height).to be <= height
     end
 
+    it "saves stitched-together screenshot in threaded mode" do
+      @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
+      expect(File).to_not exist(@path)
+      opts = { :page_height_limit => 2500, :threaded => true }
+
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+      @browser.screenshot.save_stitch(@path, opts).join
+
+      expect(File).to exist(@path)
+      expect(File.open(@path, "rb") { |io| io.read }[0..3]).to eq png_header
+
+      image = MiniMagick::Image.open(@path)
+      height = opts[:page_height_limit]
+
+      s = Watir::Screenshot.new(@browser)
+      s.instance_variable_set(:@browser, @browser)
+      height = height * 2 if s.send(:retina?)
+
+      expect(image.height).to be <= height
+    end
+
+    it "can create and return a thread for concurrent execution" do
+      @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
+      opts = { :page_height_limit => 2500, :threaded => true }
+      @browser = Watir::Browser.new browser_key
+      @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
+      thread = @browser.screenshot.save_stitch(@path, opts)
+      expect(thread).to be_a Thread
+      thread.join
+    end
+
     it "gets a base64 screenshot payload" do
       @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
@@ -166,7 +230,7 @@ RSpec.describe Watir::Screenshot do
       expect(s.send(:one_shot?)).to be_truthy
     end
 
-    it "handles cross-domain images and svgs" do
+    xit "handles cross-domain images and svgs" do
       pending("a version of base64_canvas that can actually do this")
 
       @browser = Watir::Browser.new browser_key, options: browser_options
