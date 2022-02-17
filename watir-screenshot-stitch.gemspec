@@ -29,16 +29,16 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.16"
-  spec.add_development_dependency "rake", ">= 12.3.3"
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "chunky_png", "~> 1.3"
+  spec.add_development_dependency "bundler", "~> 2.2"
+  spec.add_development_dependency "rake", ">= 13.0"
+  spec.add_development_dependency "rspec", "~> 3.10"
+  spec.add_development_dependency "chunky_png", "~> 1.4"
 
   spec.required_ruby_version = '>= 2.3.0'
 
-  spec.add_dependency "rubyzip", "~> 2.0"
-  spec.add_dependency "watir", "~> 6.12"
-  spec.add_dependency "mini_magick", "~> 4.0"
-  spec.add_dependency "os", "~> 1.0"
-  spec.add_dependency "binding_of_caller", "~> 0.7"
+  spec.add_dependency "rubyzip", "~> 2.3"
+  spec.add_dependency "watir", "~> 7.1"
+  spec.add_dependency "mini_magick", "~> 4.11"
+  spec.add_dependency "os", "~> 1.1"
+  spec.add_dependency "binding_of_caller", "~> 1.0"
 end

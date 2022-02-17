@@ -8,9 +8,10 @@ RSpec.describe Watir::Screenshot do
 
   context "driving firefox" do
     let(:browser_key) { :firefox }
+    let(:browser_options) { { accept_insecure_certs: true } }
 
     it "gets a base64 screenshot payload from base64_geckodriver" do
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       out = @browser.screenshot.base64_geckodriver
 
@@ -27,7 +28,7 @@ RSpec.describe Watir::Screenshot do
       expect(File).to_not exist(@path)
       opts = { :page_height_limit => 2500 }
 
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       @browser.screenshot.save_stitch(@path, opts)
 
@@ -46,7 +47,7 @@ RSpec.describe Watir::Screenshot do
     end
 
     it "gets a base64 screenshot payload from base64_canvas" do
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       out = @browser.screenshot.base64_canvas
 
@@ -59,7 +60,7 @@ RSpec.describe Watir::Screenshot do
     end
 
     it "stops taking screenshots when page is the height of the screenshot" do
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://google.com"
 
       s = Watir::Screenshot.new(@browser)
@@ -77,7 +78,7 @@ RSpec.describe Watir::Screenshot do
     end
 
     it "recalulates the screen resolution each time" do
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @screenshot = @browser.screenshot
 
       allow(@screenshot).to receive(:retina?).and_return(true)
@@ -110,13 +111,14 @@ RSpec.describe Watir::Screenshot do
 
   context "driving chrome" do
     let(:browser_key) { :chrome }
+    let(:browser_options) { { accept_insecure_certs: true } }
 
     it "saves stitched-together screenshot" do
       @path = "#{Dir.tmpdir}/test#{Time.now.to_i}.png"
       expect(File).to_not exist(@path)
       opts = { :page_height_limit => 2500 }
 
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       @browser.screenshot.save_stitch(@path, opts)
 
@@ -134,7 +136,7 @@ RSpec.describe Watir::Screenshot do
     end
 
     it "gets a base64 screenshot payload" do
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://github.com/mozilla/geckodriver/issues/570"
       out = @browser.screenshot.base64_canvas
 
@@ -147,7 +149,7 @@ RSpec.describe Watir::Screenshot do
     end
 
     it "stops taking screenshots when page is the height of the screenshot" do
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://google.com"
 
       s = Watir::Screenshot.new(@browser)
@@ -167,7 +169,7 @@ RSpec.describe Watir::Screenshot do
     it "handles cross-domain images and svgs" do
       pending("a version of base64_canvas that can actually do this")
 
-      @browser = Watir::Browser.new browser_key
+      @browser = Watir::Browser.new browser_key, options: browser_options
       @browser.goto "https://advisors.massmutual.com/"
       path1 = "#{Dir.tmpdir}/base64-test#{Time.now.to_i}.png"
       path2 = "#{Dir.tmpdir}/save-test#{Time.now.to_i}.png"
